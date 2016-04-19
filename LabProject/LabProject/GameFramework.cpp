@@ -82,16 +82,20 @@ void CGameFramework::SetupRenderStates()
 
 void CGameFramework::BuildObjects()
 {
+
 	CCubeMesh *pCubeMesh = new CCubeMesh();
+	m_pCubespce = new CCubeSpace();
 
 	m_nObjects = 2;
 	m_pObjects = new CGameObject[m_nObjects];
 	m_pObjects[0].SetMesh(pCubeMesh);
 	m_pObjects[0].SetColor(RGB(255, 0, 0));
 	m_pObjects[0].SetPosition(-3.5f, +2.0f, +14.0f);
+	m_pObjects[0].m_OvjectMoveVector = D3DXVECTOR3(0.0f, 0.0f, 0.01f);
     m_pObjects[1].SetMesh(pCubeMesh);
 	m_pObjects[1].SetColor(RGB(0, 0, 255));
 	m_pObjects[1].SetPosition(+3.5f, -2.0f, +14.0f);
+	m_pObjects[1].m_OvjectMoveVector = D3DXVECTOR3(0.01f, 0.02f, 0.0f);
 }
 
 void CGameFramework::ReleaseObjects()
@@ -111,10 +115,10 @@ void CGameFramework::OnDestroy()
 
 void CGameFramework::ProcessInput()
 {
-	if (GetKeyState(VK_LEFT) & 0xFF00)m_pCamera->m_Matrix._41 -= 25.0f * 0.0005f;
-	if (GetKeyState(VK_RIGHT) & 0xFF00) m_pCamera->m_Matrix._41 += 25.0f * 0.0005f;
-	if (GetKeyState(VK_UP) & 0xFF00) m_pCamera->m_Matrix._42 += 25.0f * 0.0005f;
-	if (GetKeyState(VK_DOWN) & 0xFF00) m_pCamera->m_Matrix._42 -= 25.0f * 0.0005f;
+	if (GetKeyState(VK_LEFT) & 0xFF00)m_pCamera->m_Matrix._41 += 25.0f * 0.0005f;
+	if (GetKeyState(VK_RIGHT) & 0xFF00) m_pCamera->m_Matrix._41 -= 25.0f * 0.0005f;
+	if (GetKeyState(VK_UP) & 0xFF00) m_pCamera->m_Matrix._42 -= 25.0f * 0.0005f;
+	if (GetKeyState(VK_DOWN) & 0xFF00) m_pCamera->m_Matrix._42 += 25.0f * 0.0005f;
 	if (GetKeyState(VK_DELETE) & 0xFF00) m_pCamera->m_Matrix._43 += 25.0f * 0.0005f;
 	if (GetKeyState(VK_END) & 0xFF00) m_pCamera->m_Matrix._43 -= 25.0f * 0.0005f;
 }
@@ -132,6 +136,37 @@ void CGameFramework::AnimateObjects()
 	}
 }
 
+void CGameFramework::MoveObjects()
+{
+	
+	for (int i = 0; i < m_nObjects; i++)
+	{
+		m_pObjects[i].Translate(m_pObjects[i].m_OvjectMoveVector);
+	}
+}
+
+void CGameFramework::ReflectObject()
+{
+	
+	D3DXVECTOR3 object;
+	D3DXVECTOR3 reflectionVector;
+	float projection;
+	for (int i = 0; i < m_nObjects; i++)
+	{
+		for (int j = 0; j < 6; j++)
+		{
+			object = D3DXVECTOR3(m_pObjects[i].m_WorldMatrix._41, m_pObjects[i].m_WorldMatrix._42, m_pObjects[i].m_WorldMatrix._43);
+			if (D3DXPlaneDotCoord(&m_pCubespce->m_Plane[j], &object) < 0)
+			{
+				projection = D3DXVec3Dot(&m_pObjects[i].m_OvjectMoveVector, &m_pCubespce->m_Normal[j]);
+				reflectionVector = m_pObjects[i].m_OvjectMoveVector - (2 * projection * m_pCubespce->m_Normal[j]);
+				m_pObjects[i].m_OvjectMoveVector = reflectionVector;
+			}
+		}
+		
+	}
+}
+
 void CGameFramework::FrameAdvance()
 {    
     if (!m_bActive) return;
@@ -141,6 +176,10 @@ void CGameFramework::FrameAdvance()
 	ProcessInput();
 
 	AnimateObjects();
+
+	ReflectObject();
+
+	MoveObjects();
 
     ClearFrameBuffer(RGB(255, 255, 255));
 

@@ -1,0 +1,19 @@
+﻿Build started 4/19/2016 9:27:57 PM.
+     1>Project "D:\work\3D\Direct_stusy\LabProject\LabProject\LabProject.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Release\LabProject.pch" /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt GameFramework.cpp
+         GameFramework.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\work\3D\Direct_stusy\LabProject\Release\LabProject.exe" /INCREMENTAL:NO /NOLOGO d3d11.lib d3dx11.lib d3dx11d.lib d3dcompiler.lib d3dx9.lib d3dx9d.lib dxerr.lib dxguid.lib dxgi.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\work\3D\Direct_stusy\LabProject\Release\LabProject.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\work\3D\Direct_stusy\LabProject\Release\LabProject.lib" /MACHINE:X86 /SAFESEH Release\LabProject.res
+         Release\GameFramework.obj
+         Release\GameObject.obj
+         Release\LabProject.obj
+         Release\stdafx.obj
+         Generating code
+         Finished generating code
+         LabProject.vcxproj -> D:\work\3D\Direct_stusy\LabProject\Release\LabProject.exe
+     1>Done Building Project "D:\work\3D\Direct_stusy\LabProject\LabProject\LabProject.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.65

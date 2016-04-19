@@ -1,6 +1,24 @@
 ﻿#include "StdAfx.h"
 #include "GameObject.h"
 
+
+CCubeSpace::CCubeSpace()
+{
+	D3DXVECTOR3 Normal[6]{D3DXVECTOR3(0, 0, -1), D3DXVECTOR3(0, 0, 1),
+		D3DXVECTOR3(0, -1, 0), D3DXVECTOR3(0, 1, 0), D3DXVECTOR3(-1, 0, 0), D3DXVECTOR3(1, 0, 0)};
+
+	D3DXVECTOR3 point[6]{D3DXVECTOR3(0, 0, 50), D3DXVECTOR3(0, 0, -50),
+		D3DXVECTOR3(0, 50, 0), D3DXVECTOR3(0, -50, 0), D3DXVECTOR3(50, 0, 0), D3DXVECTOR3(-50, 0, 0)};
+
+	
+	for (int i = 0; i < 6; ++i)
+	{
+		m_point[i] = point[i];
+		m_Normal[i] = Normal[i];
+		D3DXPlaneFromPointNormal(&m_Plane[i], &m_point[i], &m_Normal[i]);
+	}	
+}
+
 CPolygon::CPolygon(int nVertices) 
 { 
 	if (nVertices > 0)
@@ -65,11 +83,11 @@ void CPolygon::Draw(HDC hDCFrameBuffer, CGameObject *pObject, CCamera *pCamera)
 
 		if ((i != 0) && (vCurrent.z > 0.0f))
 		{
-						
 			::MoveToEx(hDCFrameBuffer, (long)vPrevious.x, (long)vPrevious.y, NULL);
 			::LineTo(hDCFrameBuffer, (long)vCurrent.x, (long)vCurrent.y);
 		}
 		vPrevious = vCurrent; 
+
 
 	}
 
@@ -280,6 +298,13 @@ void CGameObject::Rotate(float pitch, float yaw, float roll)
 	D3DXMatrixRotationY(&mRotate, D3DXToRadian(yaw));
 	D3DXMatrixRotationZ(&mRotate, D3DXToRadian(roll));
 	D3DXMatrixMultiply(&m_WorldMatrix, &mRotate, &m_WorldMatrix);
+}
+
+void CGameObject::Translate(D3DXVECTOR3 move)
+{
+	m_WorldMatrix._41 += move.x;
+	m_WorldMatrix._42 += move.y;
+	m_WorldMatrix._43 += move.z;
 }
 
 void CGameObject::SetPosition(float x, float y, float z)

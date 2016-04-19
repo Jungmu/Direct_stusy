@@ -10,6 +10,15 @@ struct VIEWPORT
 	int						m_nHeight;
 };
 
+class CCubeSpace
+{
+public:
+	CCubeSpace();
+	D3DXPLANE m_Plane[6]; 
+	D3DXVECTOR3 m_Normal[6];
+	D3DXVECTOR3 m_point[6];
+};
+
 class CCamera
 {
 public:
@@ -88,6 +97,7 @@ public:
 
 	D3DXMATRIX m_WorldMatrix;
 
+	D3DXVECTOR3 m_OvjectMoveVector;
 
 
 public:
@@ -96,7 +106,7 @@ public:
 	
 	void SetPosition(float x, float y, float z);
 	void Rotate(float pitch, float yaw, float roll);
-
+	void Translate(D3DXVECTOR3 move);
 	virtual void Render(HDC hDCFrameBuffer, CCamera *pCamera);
 };
 

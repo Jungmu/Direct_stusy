@@ -20,6 +20,7 @@ public:
 	CGameFramework(void);
 	~CGameFramework(void);
 
+
 	bool OnCreate(HINSTANCE hInstance, HWND hMainWnd);
 	void OnDestroy();
 	void FrameAdvance();
@@ -39,6 +40,7 @@ private:
 
 	int							m_nObjects;
 	CGameObject					*m_pObjects;
+	CCubeSpace *m_pCubespce ;
 
 public:
 	void BuildFrameBuffer();
@@ -50,6 +52,8 @@ public:
 	void SetupGameState();
 	void SetupRenderStates();
 	void AnimateObjects();
+	void MoveObjects();
+	void ReflectObject();
 	void ProcessInput();
 
 	void DrawObject(CGameObject *pObject, D3DXMATRIX& mtxViewProject);
