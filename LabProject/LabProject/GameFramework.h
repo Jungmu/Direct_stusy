@@ -40,6 +40,7 @@ private:
 
 	int							m_nObjects;
 	CGameObject					*m_pObjects;
+	CGameObject					*m_pMasterObject;
 	CCubeSpace *m_pCubespce ;
 
 public:

@@ -77,6 +77,13 @@ public:
 	virtual void Render(HDC hDCFrameBuffer, CGameObject *pObject, CCamera *pCamera);
 };
 
+class CMasterCubeMesh : public CMesh
+{
+public:
+	CMasterCubeMesh();
+	virtual ~CMasterCubeMesh();
+};
+
 class CCubeMesh : public CMesh
 {
 public:

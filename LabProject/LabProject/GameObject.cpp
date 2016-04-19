@@ -91,82 +91,7 @@ void CPolygon::Draw(HDC hDCFrameBuffer, CGameObject *pObject, CCamera *pCamera)
 
 	}
 
-	
 
-
-
-
-//	CVertex vertex;
-//    D3DXVECTOR3 vPrevious, vCurrent, vRotated;
-//    for (int i = 0; i <= m_nVertices; i++) 
-//    {
-//		vertex = m_pVertices[i % m_nVertices];
-//        vRotated = vCurrent = vertex.m_vPosition;	
-//
-////Rotation Transformation
-//		if (pObject->m_fxRotation != 0.0f) 
-//		{
-//			 vRotated.y = float(vCurrent.y * cos(DegreeToRadian(pObject->m_fxRotation)) - vCurrent.z * sin(DegreeToRadian(pObject->m_fxRotation)));
-//			 vRotated.z = float(vCurrent.y * sin(DegreeToRadian(pObject->m_fxRotation)) + vCurrent.z * cos(DegreeToRadian(pObject->m_fxRotation)));
-//			 vCurrent = vRotated;
-//		}
-//		if (pObject->m_fyRotation != 0.0f) 
-//		{
-//			 vRotated.x = float(vCurrent.x * cos(DegreeToRadian(pObject->m_fyRotation)) + vCurrent.z * sin(DegreeToRadian(pObject->m_fyRotation)));
-//			 vRotated.z = float(-vCurrent.x * sin(DegreeToRadian(pObject->m_fyRotation)) + vCurrent.z * cos(DegreeToRadian(pObject->m_fyRotation)));
-//			 vCurrent = vRotated;
-//		}
-//		if (pObject->m_fzRotation != 0.0f) 
-//		{
-//			 vRotated.x = float(vCurrent.x * cos(DegreeToRadian(pObject->m_fzRotation)) - vCurrent.y * sin(DegreeToRadian(pObject->m_fzRotation)));
-//			 vRotated.y = float(vCurrent.x * sin(DegreeToRadian(pObject->m_fzRotation)) + vCurrent.y * cos(DegreeToRadian(pObject->m_fzRotation)));
-//			 vCurrent = vRotated;
-//		}
-////Translation Transformation
-//		vCurrent.x += pObject->m_fxPosition;
-//		vCurrent.y += pObject->m_fyPosition;
-//		vCurrent.z += pObject->m_fzPosition;
-////View Transformation
-//		vCurrent.x -= pCamera->m_fxPosition;
-//		vCurrent.y -= pCamera->m_fyPosition;
-//		vCurrent.z -= pCamera->m_fzPosition;
-//		if (pCamera->m_fxRotation != 0.0f) 
-//		{
-//			 vRotated.y = float(vCurrent.y * cos(DegreeToRadian(-pCamera->m_fxRotation)) - vCurrent.z * sin(DegreeToRadian(-pCamera->m_fxRotation)));
-//			 vRotated.z = float(vCurrent.y * sin(DegreeToRadian(-pCamera->m_fxRotation)) + vCurrent.z * cos(DegreeToRadian(-pCamera->m_fxRotation)));
-//			 vCurrent.x = vRotated.x;
-//			 vCurrent.y = vRotated.y;
-//		}
-//		if (pCamera->m_fyRotation != 0.0f) 
-//		{
-//			 vRotated.x = float(vCurrent.x * cos(DegreeToRadian(-pCamera->m_fyRotation)) + vCurrent.z * sin(DegreeToRadian(-pCamera->m_fyRotation)));
-//			 vRotated.z = float(-vCurrent.x * sin(DegreeToRadian(-pCamera->m_fyRotation)) + vCurrent.z * cos(DegreeToRadian(-pCamera->m_fyRotation)));
-//			 vCurrent.x = vRotated.x;
-//			 vCurrent.y = vRotated.y;
-//		}
-//		if (pCamera->m_fzRotation != 0.0f) 
-//		{
-//			 vRotated.x = float(vCurrent.x * cos(DegreeToRadian(-pCamera->m_fzRotation)) - vCurrent.y * sin(DegreeToRadian(-pCamera->m_fzRotation)));
-//			 vRotated.y = float(vCurrent.x * sin(DegreeToRadian(-pCamera->m_fzRotation)) + vCurrent.y * cos(DegreeToRadian(-pCamera->m_fzRotation)));
-//			 vCurrent.x = vRotated.x;
-//			 vCurrent.y = vRotated.y;
-//		}
-////Perspective Transformation
-//	    float fAspect = (float)pCamera->m_Viewport.m_nWidth / (float)pCamera->m_Viewport.m_nHeight;
-//		if (vCurrent.z != 0.0f) vCurrent.x /= (fAspect * vCurrent.z);
-//		if (vCurrent.z != 0.0f) vCurrent.y /= vCurrent.z;
-////Screen Transformation
-//        vCurrent.x = +vCurrent.x * (pCamera->m_Viewport.m_nWidth * 0.5f) + pCamera->m_Viewport.m_xTopLeft + (pCamera->m_Viewport.m_nWidth * 0.5f);
-//        vCurrent.y = -vCurrent.y * (pCamera->m_Viewport.m_nHeight * 0.5f) + pCamera->m_Viewport.m_yTopLeft + (pCamera->m_Viewport.m_nHeight * 0.5f);
-//
-//        if ((i != 0) && (vCurrent.z > 0.0f)) 
-//		{
-//			
-//			::MoveToEx(hDCFrameBuffer, (long)vPrevious.x, (long)vPrevious.y, NULL);
-//			::LineTo(hDCFrameBuffer, (long)vCurrent.x, (long)vCurrent.y);
-//		}
-//        vPrevious = vCurrent; 
-//    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -208,6 +133,54 @@ void CMesh::Render(HDC hDCFrameBuffer, CGameObject *pObject, CCamera *pCamera)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+CMasterCubeMesh::CMasterCubeMesh() : CMesh(6)
+{
+	CPolygon *pFrontFace = new CPolygon(4);
+	pFrontFace->SetVertex(0, CVertex(-5, +5, -5));
+	pFrontFace->SetVertex(1, CVertex(+5, +5, -5));
+	pFrontFace->SetVertex(2, CVertex(+5, -5, -5));
+	pFrontFace->SetVertex(3, CVertex(-5, -5, -5));
+	SetPolygon(0, pFrontFace);
+
+	CPolygon *pTopFace = new CPolygon(4);
+	pTopFace->SetVertex(0, CVertex(-5, +5, +5));
+	pTopFace->SetVertex(1, CVertex(+5, +5, +5));
+	pTopFace->SetVertex(2, CVertex(+5, +5, -5));
+	pTopFace->SetVertex(3, CVertex(-5, +5, -5));
+	SetPolygon(1, pTopFace);
+
+	CPolygon *pBackFace = new CPolygon(4);
+	pBackFace->SetVertex(0, CVertex(-5, -5, +5));
+	pBackFace->SetVertex(1, CVertex(+5, -5, +5));
+	pBackFace->SetVertex(2, CVertex(+5, +5, +5));
+	pBackFace->SetVertex(3, CVertex(-5, +5, +5));
+	SetPolygon(2, pBackFace);
+
+	CPolygon *pBottomFace = new CPolygon(4);
+	pBottomFace->SetVertex(0, CVertex(-5, -5, -5));
+	pBottomFace->SetVertex(1, CVertex(+5, -5, -5));
+	pBottomFace->SetVertex(2, CVertex(+5, -5, +5));
+	pBottomFace->SetVertex(3, CVertex(-5, -5, +5));
+	SetPolygon(3, pBottomFace);
+
+	CPolygon *pLeftFace = new CPolygon(4);
+	pLeftFace->SetVertex(0, CVertex(-5, +5, +5));
+	pLeftFace->SetVertex(1, CVertex(-5, +5, -5));
+	pLeftFace->SetVertex(2, CVertex(-5, -5, -5));
+	pLeftFace->SetVertex(3, CVertex(-5, -5, +5));
+	SetPolygon(4, pLeftFace);
+
+	CPolygon *pRightFace = new CPolygon(4);
+	pRightFace->SetVertex(0, CVertex(+5, +5, -5));
+	pRightFace->SetVertex(1, CVertex(+5, +5, +5));
+	pRightFace->SetVertex(2, CVertex(+5, -5, +5));
+	pRightFace->SetVertex(3, CVertex(+5, -5, -5));
+	SetPolygon(5, pRightFace);
+}
+CMasterCubeMesh::~CMasterCubeMesh()
+{
+}
+
 CCubeMesh::CCubeMesh() : CMesh(6)
 {
 	CPolygon *pFrontFace = new CPolygon(4);
@@ -330,8 +303,8 @@ void CGameObject::Render(HDC hDCFrameBuffer, CCamera *pCamera)
 CCamera::CCamera() 
 { 
 
-	D3DXVECTOR3 vEyePt(0.0f, 30.0f, -10.0f);
-	D3DXVECTOR3 vLookatPt(0.0f, 2.0f, 14.0f);
+	D3DXVECTOR3 vEyePt(0.0f, 50.0f, -200.0f);
+	D3DXVECTOR3 vLookatPt(0.0f, 0.0f, 0.0f);
 	D3DXVECTOR3 vUpVec(0.0f, 1.0f, 0.0f);
 
 	D3DXMatrixLookAtLH(&m_Matrix, &vEyePt, &vLookatPt, &vUpVec);
