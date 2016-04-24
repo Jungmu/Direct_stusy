@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 //-----------------------------------------------------------------------------
 // File: GameFramework.h
@@ -8,11 +8,12 @@
 #define _GAME_APPLICATION_FRAMEWORK_H_
 
 #include "stdafx.h"
-
+#include "Timer.h"
 #include "GameObject.h"
 
 #define CLIENT_WIDTH	640
 #define CLIENT_HEIGHT	480
+
 
 class CGameFramework
 {
@@ -41,6 +42,7 @@ private:
 	int							m_nObjects;
 	CGameObject					*m_pObjects;
 	CGameObject					*m_pMasterObject;
+	CGameObject					*m_pLineObject;
 	CCubeSpace *m_pCubespce ;
 
 public:
@@ -56,6 +58,7 @@ public:
 	void MoveObjects();
 	void ReflectObject();
 	void ProcessInput();
+	void CrashCube();
 
 	void DrawObject(CGameObject *pObject, D3DXMATRIX& mtxViewProject);
 	void DrawPrimitive(CPolygon *pPolygon, D3DXMATRIX& mtxTransform);

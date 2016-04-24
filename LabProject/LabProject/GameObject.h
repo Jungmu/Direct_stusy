@@ -73,6 +73,7 @@ public:
 	void Release() { m_nReferences--; if (m_nReferences <= 0) delete this; }
 
 public:
+	CPolygon** GetPolygon();
 	void SetPolygon(int nIndex, CPolygon *pPolygon);
 	virtual void Render(HDC hDCFrameBuffer, CGameObject *pObject, CCamera *pCamera);
 };
@@ -82,6 +83,13 @@ class CMasterCubeMesh : public CMesh
 public:
 	CMasterCubeMesh();
 	virtual ~CMasterCubeMesh();
+};
+
+class CLineMesh : public CMesh
+{
+public:
+	CLineMesh();
+	virtual ~CLineMesh();
 };
 
 class CCubeMesh : public CMesh

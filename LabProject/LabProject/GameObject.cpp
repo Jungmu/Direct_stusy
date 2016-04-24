@@ -41,6 +41,8 @@ void CPolygon::SetVertex(int nIndex, CVertex vertex)
 	}
 }
 
+
+
 void CPolygon::Draw(HDC hDCFrameBuffer, CGameObject *pObject, CCamera *pCamera)
 {
 
@@ -94,6 +96,8 @@ void CPolygon::Draw(HDC hDCFrameBuffer, CGameObject *pObject, CCamera *pCamera)
 
 }
 
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CMesh::CMesh(int nPolygons)
@@ -123,6 +127,11 @@ void CMesh::SetPolygon(int nIndex, CPolygon *pPolygon)
 	}
 }
 
+CPolygon** CMesh::GetPolygon()
+{
+	return m_ppPolygons;
+}
+
 void CMesh::Render(HDC hDCFrameBuffer, CGameObject *pObject, CCamera *pCamera)
 {
     for (int j = 0; j < m_nPolygons; j++)
@@ -133,6 +142,22 @@ void CMesh::Render(HDC hDCFrameBuffer, CGameObject *pObject, CCamera *pCamera)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+CLineMesh::CLineMesh() : CMesh(2)
+{
+	CPolygon *pLineFront = new CPolygon(2);
+	pLineFront->SetVertex(0, CVertex(0, 5, 0));
+	pLineFront->SetVertex(1, CVertex(0, 150, 0));
+	SetPolygon(0, pLineFront);
+
+	CPolygon *pLineBack = new CPolygon(2);
+	pLineBack->SetVertex(0, CVertex(0, -5, 0));
+	pLineBack->SetVertex(1, CVertex(0, -150, 0));
+	SetPolygon(1, pLineBack);
+}
+CLineMesh::~CLineMesh()
+{
+}
+
 CMasterCubeMesh::CMasterCubeMesh() : CMesh(6)
 {
 	CPolygon *pFrontFace = new CPolygon(4);
@@ -268,7 +293,9 @@ void CGameObject::Rotate(float pitch, float yaw, float roll)
 {
 	D3DXMATRIX mRotate;
 	D3DXMatrixRotationX(&mRotate, D3DXToRadian(pitch));
+	D3DXMatrixMultiply(&m_WorldMatrix, &mRotate, &m_WorldMatrix);
 	D3DXMatrixRotationY(&mRotate, D3DXToRadian(yaw));
+	D3DXMatrixMultiply(&m_WorldMatrix, &mRotate, &m_WorldMatrix);
 	D3DXMatrixRotationZ(&mRotate, D3DXToRadian(roll));
 	D3DXMatrixMultiply(&m_WorldMatrix, &mRotate, &m_WorldMatrix);
 }

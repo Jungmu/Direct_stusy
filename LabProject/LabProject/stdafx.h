@@ -29,6 +29,7 @@
 
 // C의 런타임 헤더 파일입니다.
 #include <stdlib.h>
+#include <stdio.h>
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
@@ -37,6 +38,7 @@
 #include <D3DX9.h>
 #include <D3DX11.h>
 #include <Mmsystem.h>
+#include <math.h>
 
 #define RANDOM_COLOR	(0xFF000000 | ((rand() * 0xFFFFFF) / RAND_MAX))
 
