@@ -25,6 +25,7 @@
 #include <math.h>
 #include <d3dcompiler.h>  	//쉐이더 컴파일 함수를 사용하기 위한 헤더 파일
 #include <D3DX10Math.h>	//Direct3D 수학 함수를 사용하기 위한 헤더 파일
+#include <stdio.h>
 
 #define FRAME_BUFFER_WIDTH	640
 #define FRAME_BUFFER_HEIGHT	480
@@ -32,3 +33,4 @@
 #define VS_SLOT_CAMERA				0x00
 #define VS_SLOT_WORLD_MATRIX			0x01
 
+#define PS_SLOT_COLOR	0x00

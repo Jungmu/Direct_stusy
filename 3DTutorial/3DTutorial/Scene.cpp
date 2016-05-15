@@ -17,25 +17,19 @@ CScene::~CScene()
 
 void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 {
-	//쉐이더 객체를 생성한다.
 	CShader *pShader = new CShader();
 	pShader->CreateShader(pd3dDevice);
 
-	//게임 객체에 대한 포인터들의 배열을 정의한다.
 	m_nObjects = 1;
 	m_ppObjects = new CGameObject*[m_nObjects];
-
-	//삼각형 메쉬(CTriangleMesh)를 생성한다.
-	CTriangleMesh  *pMesh = new CTriangleMesh(pd3dDevice);
-
-	//삼각형 객체(CRotatingObject)를 생성하고 삼각형 메쉬와 쉐이더를 연결한다.
+	//가로x세로x높이가 15x15x15인 정육면체 메쉬를 생성한다.
+	CCubeMesh *pMesh = new CCubeMesh(pd3dDevice, 15.0f, 15.0f, 15.0f);
 	CRotatingObject *pObject = new CRotatingObject();
 	pObject->SetMesh(pMesh);
 	pObject->SetShader(pShader);
-
-	//객체를 저장한다.
 	m_ppObjects[0] = pObject;
 }
+
 
 
 

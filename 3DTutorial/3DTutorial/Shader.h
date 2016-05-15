@@ -32,6 +32,9 @@ public:
 	virtual void ReleaseShaderVariables();
 	//쉐이더 클래스의 상수 버퍼를 갱신하는 멤버 함수를 선언한다.
 	virtual void UpdateShaderVariable(ID3D11DeviceContext *pd3dDeviceContext, D3DXMATRIX *pd3dxmtxWorld);
+	//컴파일된 이펙트 파일에서 정점 쉐이더와 픽셀 쉐이더를 생성하는 함수이다.
+	void CreateVertexShaderFromCompiledFile(ID3D11Device *pd3dDevice, WCHAR *pszFileName, D3D11_INPUT_ELEMENT_DESC *pd3dInputLayout, UINT nElements);
+	void CreatePixelShaderFromCompiledFile(ID3D11Device *pd3dDevice, WCHAR *pszFileName);
 
 	//월드 변환 행렬을 위한 상수 버퍼에 대한 인터페이스 포인터를 선언한다.
 	ID3D11Buffer *m_pd3dcbWorldMatrix;

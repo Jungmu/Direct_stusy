@@ -101,6 +101,7 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Effect.fx" />
+    <FxCompile Include="VS.fx" />
+    <FxCompile Include="PS.fx" />
   </ItemGroup>
 </Project>

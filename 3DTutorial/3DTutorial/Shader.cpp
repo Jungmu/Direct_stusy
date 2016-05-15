@@ -1,6 +1,18 @@
 ﻿#include "stdafx.h"
 #include "Shader.h"
 
+BYTE *ReadCompiledEffectFile(WCHAR *pszFileName, int *pnReadBytes)
+{
+	FILE *pFile = NULL;
+	::_wfopen_s(&pFile, pszFileName, L"rb");
+	::fseek(pFile, 0, SEEK_END);
+	int nFileSize = ::ftell(pFile);
+	BYTE *pByteCode = new BYTE[nFileSize];
+	::rewind(pFile);
+	*pnReadBytes = ::fread(pByteCode, sizeof(BYTE), nFileSize, pFile);
+	::fclose(pFile);
+	return(pByteCode);
+}
 
 CShader::CShader()
 {
@@ -61,18 +73,20 @@ void CShader::CreatePixelShaderFromFile(ID3D11Device *pd3dDevice, WCHAR *pszFile
 }
 void CShader::CreateShader(ID3D11Device *pd3dDevice)
 {
-	/*IA 단계에 설정할 입력-레이아웃을 정의한다. 정점 버퍼의 한 원소가 CVertex 클래스의 멤버 변수(D3DXVECTOR3 즉, 실수 세 개)이므로 입력-레이아웃은 실수(32-비트) 3개로 구성되며 시멘틱이 “POSITION”이고 정점 데이터임을 표현한다.*/
 	D3D11_INPUT_ELEMENT_DESC d3dInputLayout[] =
 	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 	UINT nElements = ARRAYSIZE(d3dInputLayout);
-	//파일 “Effect.fx”에서 정점-쉐이더의 시작 함수가 "VS"인 정점-쉐이더를 생성한다. 
-	CreateVertexShaderFromFile(pd3dDevice, L"Effect.fx", "VS", "vs_5_0", &m_pd3dVertexShader, d3dInputLayout, nElements, &m_pd3dVertexLayout);
-	//파일 “Effect.fx”에서 픽셀-쉐이더의 시작 함수가 "PS"인 픽셀-쉐이더를 생성한다. 
-	CreatePixelShaderFromFile(pd3dDevice, L"Effect.fx", "PS", "ps_5_0", &m_pd3dPixelShader);
+	CreateVertexShaderFromCompiledFile(pd3dDevice, L"VS.fxo", d3dInputLayout, nElements);
+	CreatePixelShaderFromCompiledFile(pd3dDevice, L"PS.fxo");
+	//컴파일된 쉐이더 코드의 이름이 VS.fxo와 PS.fxo이다.
+
 	CreateShaderVariables(pd3dDevice);
 }
+
+
 void CShader::Render(ID3D11DeviceContext *pd3dDeviceContext)
 {
 	//정점의 입력-레이아웃을 디바이스 컨텍스트에 연결(설정)한다. 
@@ -112,4 +126,24 @@ void CShader::UpdateShaderVariable(ID3D11DeviceContext *pd3dDeviceContext, D3DXM
 	pd3dDeviceContext->VSSetConstantBuffers(VS_SLOT_WORLD_MATRIX, 1, &m_pd3dcbWorldMatrix);
 }
 
+//컴파일된 쉐이더 코드에서 정점 쉐이더를 생성한다.
+void CShader::CreateVertexShaderFromCompiledFile(ID3D11Device *pd3dDevice, WCHAR *pszFileName, D3D11_INPUT_ELEMENT_DESC *pd3dInputLayout, UINT nElements)
+{
+	int nReadBytes = 0;
+	BYTE *pByteCode = ReadCompiledEffectFile(pszFileName, &nReadBytes);
+	HRESULT hResult = pd3dDevice->CreateVertexShader(pByteCode, nReadBytes, NULL, &m_pd3dVertexShader);
+	pd3dDevice->CreateInputLayout(pd3dInputLayout, nElements, pByteCode, nReadBytes, &m_pd3dVertexLayout);
+
+	if (pByteCode) delete[] pByteCode;
+}
+
+//컴파일된 쉐이더 코드에서 픽셀 쉐이더를 생성한다.
+void CShader::CreatePixelShaderFromCompiledFile(ID3D11Device *pd3dDevice, WCHAR *pszFileName)
+{
+	int nReadBytes = 0;
+	BYTE *pByteCode = ReadCompiledEffectFile(pszFileName, &nReadBytes);
+	HRESULT hResult = pd3dDevice->CreatePixelShader(pByteCode, nReadBytes, NULL, &m_pd3dPixelShader);
+
+	if (pByteCode) delete[] pByteCode;
+}
 

@@ -13,6 +13,7 @@ private:
 	int m_nWndClientWidth;
 	int m_nWndClientHeight;
 
+	ID3D11Buffer *m_pd3dcbColor;
 	//디바이스 인터페이스에 대한 포인터이다. 주로 리소스를 생성하기 위하여 필요하다.
 	ID3D11Device *m_pd3dDevice;
 	//스왑 체인 인터페이스에 대한 포인터이다. 주로 디스플레이를 제어하기 위하여 필요하다.

@@ -139,8 +139,20 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	case WM_KEYUP:
 		switch (wParam)
 		{
+		case VK_F1:
+		case VK_F2:
+		case VK_F3:
+		{
+			D3DXCOLOR d3dxcColor = (wParam == VK_F1) ? D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f) : ((wParam == VK_F2) ? D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f) : D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f));
+			D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
+			m_pd3dDeviceContext->Map(m_pd3dcbColor, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
+			D3DXCOLOR *pcbColor = (D3DXCOLOR *)d3dMappedResource.pData;
+			*pcbColor = d3dxcColor;
+			m_pd3dDeviceContext->Unmap(m_pd3dcbColor, 0);
+			break;
+		}
 		case VK_ESCAPE:
-			::PostQuitMessage(0);
+			exit(1);
 			break;
 		default:
 			break;
@@ -216,7 +228,7 @@ void CGameFramework::BuildObjects()
 	//투영 변환 행렬을 생성한다. 
 	pCamera->GenerateProjectionMatrix(1.0f, 500.0f, float(m_nWndClientWidth) / float(m_nWndClientHeight), 90.0f);
 	//카메라 변환 행렬을 생성한다. 
-	D3DXVECTOR3 d3dxvEyePosition = D3DXVECTOR3(0.0f, 0.0f, -2.0f);
+	D3DXVECTOR3 d3dxvEyePosition = D3DXVECTOR3(0.0f, 15.0f, -35.0f);
 	D3DXVECTOR3 d3dxvLookAt = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXVECTOR3 d3dxvUp = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 	pCamera->GenerateViewMatrix(d3dxvEyePosition, d3dxvLookAt, d3dxvUp);
@@ -225,6 +237,21 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->CreateShaderVariables(m_pd3dDevice);
 
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice);
+
+	D3DXCOLOR d3dxcColor(1.0f, 0.0f, 0.0f, 1.0f);
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = sizeof(D3DXCOLOR);
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	D3D11_SUBRESOURCE_DATA d3dSubResource;
+	d3dSubResource.pSysMem = &d3dxcColor;
+	d3dSubResource.SysMemPitch = 0;
+	d3dSubResource.SysMemSlicePitch = 0;
+	m_pd3dDevice->CreateBuffer(&bd, &d3dSubResource, &m_pd3dcbColor);
+	m_pd3dDeviceContext->PSSetConstantBuffers(PS_SLOT_COLOR, 1, &m_pd3dcbColor);
+
 }
 
 
@@ -233,8 +260,8 @@ void CGameFramework::ReleaseObjects()
 {
 	if (m_pScene) m_pScene->ReleaseObjects();
 	if (m_pScene) delete m_pScene;
-
 	if (m_pPlayer) delete m_pPlayer;
+	if (m_pd3dcbColor) m_pd3dcbColor->Release();
 }
 
 
