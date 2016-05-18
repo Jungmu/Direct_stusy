@@ -20,17 +20,27 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	CShader *pShader = new CShader();
 	pShader->CreateShader(pd3dDevice);
 
-	m_nObjects = 1;
+	//객체(직육면체 객체와 사람 객체) 2개를 생성한다.
+	m_nObjects = 2;
 	m_ppObjects = new CGameObject*[m_nObjects];
-	//가로x세로x높이가 15x15x15인 정육면체 메쉬를 생성한다.
-	CCubeMesh *pMesh = new CCubeMesh(pd3dDevice, 15.0f, 15.0f, 15.0f);
-	CRotatingObject *pObject = new CRotatingObject();
-	pObject->SetMesh(pMesh);
-	pObject->SetShader(pShader);
-	m_ppObjects[0] = pObject;
+
+	CCubeMesh *pCubeMesh = new CCubeMesh(pd3dDevice, 25.0f, 25.0f, 25.0f);
+	CRotatingObject *pCubeObject = new CRotatingObject();
+	pCubeObject->SetMesh(pCubeMesh);
+	pCubeObject->SetShader(pShader);
+	//직육면체 객체의 위치를 (-50.0f, 50.0f, 0.0f)로 설정한다.
+	pCubeObject->m_d3dxmtxWorld._41 = -50.0f;
+	pCubeObject->m_d3dxmtxWorld._42 = 50.0f;
+	m_ppObjects[0] = pCubeObject;
+
+	CHumanoidMesh *pHumanMesh = new CHumanoidMesh(pd3dDevice);
+	CRotatingObject *pHumanObject = new CRotatingObject();
+	pHumanObject->SetMesh(pHumanMesh);
+	pHumanObject->SetShader(pShader);
+	//사람 객체의 위치를 (20.0f, 0.0f, 0.0f)로 설정한다.
+	pHumanObject->m_d3dxmtxWorld._41 = 20.0f;
+	m_ppObjects[1] = pHumanObject;
 }
-
-
 
 
 void CScene::ReleaseObjects()

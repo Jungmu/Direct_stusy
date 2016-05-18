@@ -228,7 +228,7 @@ void CGameFramework::BuildObjects()
 	//투영 변환 행렬을 생성한다. 
 	pCamera->GenerateProjectionMatrix(1.0f, 500.0f, float(m_nWndClientWidth) / float(m_nWndClientHeight), 90.0f);
 	//카메라 변환 행렬을 생성한다. 
-	D3DXVECTOR3 d3dxvEyePosition = D3DXVECTOR3(0.0f, 15.0f, -35.0f);
+	D3DXVECTOR3 d3dxvEyePosition = D3DXVECTOR3(0.0f, 200.0f, -170.0f);
 	D3DXVECTOR3 d3dxvLookAt = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXVECTOR3 d3dxvUp = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 	pCamera->GenerateViewMatrix(d3dxvEyePosition, d3dxvLookAt, d3dxvUp);

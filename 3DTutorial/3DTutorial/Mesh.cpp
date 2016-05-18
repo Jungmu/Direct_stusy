@@ -3,24 +3,73 @@
 
 CMesh::CMesh(ID3D11Device *pd3dDevice)
 {
-	m_nStride = sizeof(CVertex);
-	m_nOffset = 0;
+	m_nBuffers = 0;
+	m_ppd3dVertexBuffers = NULL;
+	m_pnVertexStrides = NULL;
+	m_pnVertexOffsets = NULL;
+
+	m_pd3dPositionBuffer = NULL;
+	m_pd3dColorBuffer = NULL;
+
 	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	m_pd3dRasterizerState = NULL;
-	m_nReferences = 0;
+	m_nSlot = 0;
+	m_nStartVertex = 0;
+
 	m_pd3dIndexBuffer = NULL;
 	m_nIndices = 0;
 	m_nStartIndex = 0;
 	m_nBaseVertex = 0;
+	m_nIndexOffset = 0;
+	m_dxgiIndexFormat = DXGI_FORMAT_R32_UINT;
 
+	m_pd3dRasterizerState = NULL;
+
+	m_nReferences = 0;
 }
 
 CMesh::~CMesh()
 {
-	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
 	if (m_pd3dRasterizerState) m_pd3dRasterizerState->Release();
+	if (m_pd3dPositionBuffer) m_pd3dPositionBuffer->Release();
+	if (m_pd3dColorBuffer) m_pd3dColorBuffer->Release();
 	if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
+
+	if (m_ppd3dVertexBuffers) delete[] m_ppd3dVertexBuffers;
+	if (m_pnVertexStrides) delete[] m_pnVertexStrides;
+	if (m_pnVertexOffsets) delete[] m_pnVertexOffsets;
 }
+void CMesh::AssembleToVertexBuffer(int nBuffers, ID3D11Buffer **ppd3dBuffers, UINT *pnBufferStrides, UINT *pnBufferOffsets)
+{
+	ID3D11Buffer **ppd3dNewVertexBuffers = new ID3D11Buffer*[m_nBuffers + nBuffers];
+	UINT *pnNewVertexStrides = new UINT[m_nBuffers + nBuffers];
+	UINT *pnNewVertexOffsets = new UINT[m_nBuffers + nBuffers];
+
+	if (m_nBuffers > 0)
+	{
+		for (int i = 0; i < m_nBuffers; i++)
+		{
+			ppd3dNewVertexBuffers[i] = m_ppd3dVertexBuffers[i];
+			pnNewVertexStrides[i] = m_pnVertexStrides[i];
+			pnNewVertexOffsets[i] = m_pnVertexOffsets[i];
+		}
+		if (m_ppd3dVertexBuffers) delete[] m_ppd3dVertexBuffers;
+		if (m_pnVertexStrides) delete[] m_pnVertexStrides;
+		if (m_pnVertexOffsets) delete[] m_pnVertexOffsets;
+	}
+
+	for (int i = 0; i < nBuffers; i++)
+	{
+		ppd3dNewVertexBuffers[m_nBuffers + i] = ppd3dBuffers[i];
+		pnNewVertexStrides[m_nBuffers + i] = pnBufferStrides[i];
+		pnNewVertexOffsets[m_nBuffers + i] = pnBufferOffsets[i];
+	}
+
+	m_nBuffers += nBuffers;
+	m_ppd3dVertexBuffers = ppd3dNewVertexBuffers;
+	m_pnVertexStrides = pnNewVertexStrides;
+	m_pnVertexOffsets = pnNewVertexOffsets;
+}
+
 void CMesh::CreateRasterizerState(ID3D11Device *pd3dDevice)
 {
 }
@@ -34,108 +83,74 @@ void CMesh::Release()
 	m_nReferences--;
 	if (m_nReferences <= 0) delete this;
 }
+
 void CMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
 {
-	if (m_pd3dVertexBuffer) pd3dDeviceContext->IASetVertexBuffers(0, 1, &m_pd3dVertexBuffer, &m_nStride, &m_nOffset);
-	//인덱스 버퍼가 있으면 인덱스 버퍼를 디바이스 컨텍스트에 연결한다.
-	if (m_pd3dIndexBuffer) pd3dDeviceContext->IASetIndexBuffer(m_pd3dIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-	pd3dDeviceContext->IASetPrimitiveTopology(
-		m_d3dPrimitiveTopology);
-	if (m_pd3dRasterizerState) pd3dDeviceContext->RSSetState(m_pd3dRasterizerState);
+	pd3dDeviceContext->IASetVertexBuffers(m_nSlot, m_nBuffers, m_ppd3dVertexBuffers, m_pnVertexStrides, m_pnVertexOffsets);
+	pd3dDeviceContext->IASetIndexBuffer(m_pd3dIndexBuffer, m_dxgiIndexFormat, m_nIndexOffset);
+	pd3dDeviceContext->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+	pd3dDeviceContext->RSSetState(m_pd3dRasterizerState);
 
-	/*인덱스 버퍼가 있으면 인덱스 버퍼를 사용하여 메쉬를 렌더링하고 없으면 정점 버퍼만을 사용하여 메쉬를 렌더링한다.*/
 	if (m_pd3dIndexBuffer)
 		pd3dDeviceContext->DrawIndexed(m_nIndices, m_nStartIndex, m_nBaseVertex);
 	else
-		pd3dDeviceContext->Draw(m_nVertices, m_nOffset);
-}
-
-
-CTriangleMesh::CTriangleMesh(ID3D11Device *pd3dDevice) : CMesh(pd3dDevice)
-{
-	m_nVertices = 3;
-	m_nStride = sizeof(CDiffusedVertex);
-	m_nOffset = 0;
-	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	/*정점(삼각형의 꼭지점)의 색상은 시계방향 순서대로 빨간색, 녹색, 파란색으로 지정한다. D3DXCOLOR 매크로는 RGBA(Red, Green, Blue, Alpha) 4개의 파라메터를 사용하여 색상을 표현하기 위하여 사용한다. 각 파라메터는 0.0~1.0 사이의 실수값을 가진다.*/
-	CDiffusedVertex pVertices[3];
-	pVertices[0] = CDiffusedVertex(D3DXVECTOR3(0.0f, 0.5f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[1] = CDiffusedVertex(D3DXVECTOR3(0.5f, -0.5f, 0.0f), D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f));
-	pVertices[2] = CDiffusedVertex(D3DXVECTOR3(-0.5f, -0.5f, 0.0f), D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f));
-
-	D3D11_BUFFER_DESC d3dBufferDesc;
-	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
-	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	d3dBufferDesc.ByteWidth = m_nStride * m_nVertices;
-	d3dBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	d3dBufferDesc.CPUAccessFlags = 0;
-	D3D11_SUBRESOURCE_DATA d3dBufferData;
-	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
-	d3dBufferData.pSysMem = pVertices;
-	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dVertexBuffer);
-
-	CreateRasterizerState(pd3dDevice);
+		pd3dDeviceContext->Draw(m_nVertices, m_nStartVertex);
 }
 CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice, float fWidth, float fHeight, float fDepth) : CMesh(pd3dDevice)
 {
 	m_nVertices = 8;
-	m_nStride = sizeof(CDiffusedVertex);
-	m_nOffset = 0;
 	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	float fx = fWidth*0.5f, fy = fHeight*0.5f, fz = fDepth*0.5f;
 
-	//정점 버퍼는 직육면체의 꼭지점 8개에 대한 정점 데이터를 가진다.
-	CDiffusedVertex pVertices[8];
-	pVertices[0] = CDiffusedVertex(D3DXVECTOR3(-fx, +fy, -fz), RANDOM_COLOR);
-	pVertices[1] = CDiffusedVertex(D3DXVECTOR3(+fx, +fy, -fz), RANDOM_COLOR);
-	pVertices[2] = CDiffusedVertex(D3DXVECTOR3(+fx, +fy, +fz), RANDOM_COLOR);
-	pVertices[3] = CDiffusedVertex(D3DXVECTOR3(-fx, +fy, +fz), RANDOM_COLOR);
-	pVertices[4] = CDiffusedVertex(D3DXVECTOR3(-fx, -fy, -fz), RANDOM_COLOR);
-	pVertices[5] = CDiffusedVertex(D3DXVECTOR3(+fx, -fy, -fz), RANDOM_COLOR);
-	pVertices[6] = CDiffusedVertex(D3DXVECTOR3(+fx, -fy, +fz), RANDOM_COLOR);
-	pVertices[7] = CDiffusedVertex(D3DXVECTOR3(-fx, -fy, +fz), RANDOM_COLOR);
+	D3DXVECTOR3 pd3dxvPositions[8];
+	pd3dxvPositions[0] = D3DXVECTOR3(-fx, +fy, -fz);
+	pd3dxvPositions[1] = D3DXVECTOR3(+fx, +fy, -fz);
+	pd3dxvPositions[2] = D3DXVECTOR3(+fx, +fy, +fz);
+	pd3dxvPositions[3] = D3DXVECTOR3(-fx, +fy, +fz);
+	pd3dxvPositions[4] = D3DXVECTOR3(-fx, -fy, -fz);
+	pd3dxvPositions[5] = D3DXVECTOR3(+fx, -fy, -fz);
+	pd3dxvPositions[6] = D3DXVECTOR3(+fx, -fy, +fz);
+	pd3dxvPositions[7] = D3DXVECTOR3(-fx, -fy, +fz);
 
 	D3D11_BUFFER_DESC d3dBufferDesc;
 	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
 	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	d3dBufferDesc.ByteWidth = sizeof(CDiffusedVertex) * m_nVertices;
+	d3dBufferDesc.ByteWidth = sizeof(D3DXVECTOR3) * m_nVertices;
 	d3dBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	d3dBufferDesc.CPUAccessFlags = 0;
 	D3D11_SUBRESOURCE_DATA d3dBufferData;
 	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
-	d3dBufferData.pSysMem = pVertices;
-	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dVertexBuffer);
+	d3dBufferData.pSysMem = pd3dxvPositions;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dPositionBuffer);
 
-	/*인덱스 버퍼는 직육면체의 6개의 면(사각형)에 대한 기하 정보를 갖는다. 삼각형 리스트로 직육면체를 표현할 것이므로 각 면은 2개의 삼각형을 가지고 각 삼각형은 3개의 정점이 필요하다. 즉, 인덱스 버퍼는 전체 36(=6*2*3)개의 인덱스를 가진다.*/
+	D3DXCOLOR pd3dxColors[8];
+	for (int i = 0; i < 8; i++) pd3dxColors[i] = RANDOM_COLOR;
+
+	d3dBufferDesc.ByteWidth = sizeof(D3DXCOLOR) * m_nVertices;
+	d3dBufferData.pSysMem = pd3dxColors;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dColorBuffer);
+
+	ID3D11Buffer *ppd3dBuffers[2] = { m_pd3dPositionBuffer, m_pd3dColorBuffer };
+	UINT pnBufferStrides[2] = { sizeof(D3DXVECTOR3), sizeof(D3DXCOLOR) };
+	UINT pnBufferOffsets[2] = { 0, 0 };
+	AssembleToVertexBuffer(2, ppd3dBuffers, pnBufferStrides, pnBufferOffsets);
+
 	m_nIndices = 36;
 
-	UINT pIndices[36];
-	//ⓐ 앞면(Front) 사각형의 위쪽 삼각형
-	pIndices[0] = 3; pIndices[1] = 1; pIndices[2] = 0;
-	//ⓑ 앞면(Front) 사각형의 아래쪽 삼각형
-	pIndices[3] = 2; pIndices[4] = 1; pIndices[5] = 3;
-	//ⓒ 윗면(Top) 사각형의 위쪽 삼각형
-	pIndices[6] = 0; pIndices[7] = 5; pIndices[8] = 4;
-	//ⓓ 윗면(Top) 사각형의 아래쪽 삼각형
-	pIndices[9] = 1; pIndices[10] = 5; pIndices[11] = 0;
-	//ⓔ 뒷면(Back) 사각형의 위쪽 삼각형
-	pIndices[12] = 3; pIndices[13] = 4; pIndices[14] = 7;
-	//ⓕ 뒷면(Back) 사각형의 아래쪽 삼각형
-	pIndices[15] = 0; pIndices[16] = 4; pIndices[17] = 3;
-	//ⓖ 아래면(Bottom) 사각형의 위쪽 삼각형
-	pIndices[18] = 1; pIndices[19] = 6; pIndices[20] = 5;
-	//ⓗ 아래면(Bottom) 사각형의 아래쪽 삼각형
-	pIndices[21] = 2; pIndices[22] = 6; pIndices[23] = 1;
-	//ⓘ 옆면(Left) 사각형의 위쪽 삼각형
-	pIndices[24] = 2; pIndices[25] = 7; pIndices[26] = 6;
-	//ⓙ 옆면(Left) 사각형의 아래쪽 삼각형
-	pIndices[27] = 3; pIndices[28] = 7; pIndices[29] = 2;
-	//ⓚ 옆면(Right) 사각형의 위쪽 삼각형
-	pIndices[30] = 6; pIndices[31] = 4; pIndices[32] = 5;
-	//ⓛ 옆면(Right) 사각형의 아래쪽 삼각형
-	pIndices[33] = 7; pIndices[34] = 4; pIndices[35] = 6;
+	UINT pnIndices[36];
+	pnIndices[0] = 3; pnIndices[1] = 1; pnIndices[2] = 0;
+	pnIndices[3] = 2; pnIndices[4] = 1; pnIndices[5] = 3;
+	pnIndices[6] = 0; pnIndices[7] = 5; pnIndices[8] = 4;
+	pnIndices[9] = 1; pnIndices[10] = 5; pnIndices[11] = 0;
+	pnIndices[12] = 3; pnIndices[13] = 4; pnIndices[14] = 7;
+	pnIndices[15] = 0; pnIndices[16] = 4; pnIndices[17] = 3;
+	pnIndices[18] = 1; pnIndices[19] = 6; pnIndices[20] = 5;
+	pnIndices[21] = 2; pnIndices[22] = 6; pnIndices[23] = 1;
+	pnIndices[24] = 2; pnIndices[25] = 7; pnIndices[26] = 6;
+	pnIndices[27] = 3; pnIndices[28] = 7; pnIndices[29] = 2;
+	pnIndices[30] = 6; pnIndices[31] = 4; pnIndices[32] = 5;
+	pnIndices[33] = 7; pnIndices[34] = 4; pnIndices[35] = 6;
 
 	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
 	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -143,11 +158,9 @@ CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice, float fWidth, float fHeight, floa
 	d3dBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	d3dBufferDesc.CPUAccessFlags = 0;
 	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
-	d3dBufferData.pSysMem = pIndices;
-	//인덱스 버퍼를 생성한다.
+	d3dBufferData.pSysMem = pnIndices;
 	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dIndexBuffer);
 
-	CreateRasterizerState(pd3dDevice);
 }
 
 
@@ -167,23 +180,69 @@ void CCubeMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
 	CMesh::Render(pd3dDeviceContext);
 }
 
+CHumanoidMesh::CHumanoidMesh(ID3D11Device *pd3dDevice) : CMesh(pd3dDevice)
+{
+	FILE *pFile = NULL;
+	//이진 파일을 열어 정점의 개수와 정점의 위치 벡터들을 순서대로 읽는다.
+	::_wfopen_s(&pFile, L"Humanoid(Vertex).txt", L"rb, ccs=UNICODE");
+	int nReadBytes = ::fread(&m_nVertices, sizeof(UINT), 1, pFile);
+	D3DXVECTOR3*pd3dxvPositions = new D3DXVECTOR3[m_nVertices];
+	nReadBytes = ::fread(pd3dxvPositions, sizeof(D3DXVECTOR3), m_nVertices, pFile);
+	::fclose(pFile);
 
-CTriangleMesh ::~CTriangleMesh()
+	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	//정점은 두 개의 요소를 가지고 각 요소마다 하나의 버퍼를 생성한다.
+	/*정점의 첫 번째 요소는 위치 벡터이고 위치 벡터 한 개는 12바이트이다. 정점의 첫 번째 요소를 나타내는 버퍼를 생성한다.*/
+	D3D11_BUFFER_DESC d3dBufferDesc;
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = sizeof(D3DXVECTOR3) * m_nVertices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA d3dBufferData;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = pd3dxvPositions;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dPositionBuffer);
+	delete[] pd3dxvPositions;
+
+	//정점 두 번째 요소는 색상 벡터이고 색상 벡터 한 개는 16바이트이다.
+	D3DXCOLOR *pd3dxColors = new D3DXCOLOR[m_nVertices];
+	for (int i = 0; i < m_nVertices; i++) pd3dxColors[i] = RANDOM_COLOR;
+
+	//정점의 두 번째 요소를 나타내는 버퍼를 생성한다.
+	d3dBufferDesc.ByteWidth = sizeof(D3DXCOLOR) * m_nVertices;
+	d3dBufferData.pSysMem = pd3dxColors;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dColorBuffer);
+	delete[] pd3dxColors;
+
+	//정점을 나타내는 두 개의 버퍼와 정보를 입력 조립기로 전달할 수 있는 형태로 구성한다.
+	ID3D11Buffer *ppd3dBuffers[2] = { m_pd3dPositionBuffer, m_pd3dColorBuffer };
+	UINT pnBufferStrides[2] = { sizeof(D3DXVECTOR3), sizeof(D3DXCOLOR) };
+	UINT pnBufferOffsets[2] = { 0, 0 };
+	AssembleToVertexBuffer(2, ppd3dBuffers, pnBufferStrides, pnBufferOffsets);
+
+	//이진 파일을 열어 인덱스의 개수와 인덱스를 읽는다.
+	::_wfopen_s(&pFile, L"Humanoid(Index).txt", L"rb, ccs=UNICODE");
+	nReadBytes = ::fread(&m_nIndices, sizeof(UINT), 1, pFile);
+	UINT *pnIndices = new UINT[m_nIndices];
+	nReadBytes = ::fread(pnIndices, sizeof(UINT), m_nIndices, pFile);
+	::fclose(pFile);
+
+	//인덱스 버퍼를 생성한다.
+	::ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = sizeof(UINT) * m_nIndices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	::ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = pnIndices;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dIndexBuffer);
+
+	delete[] pnIndices;
+}
+
+CHumanoidMesh::~CHumanoidMesh()
 {
 }
-void CTriangleMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
-{
-	CMesh::Render(pd3dDeviceContext);
-}
-
-void CTriangleMesh::CreateRasterizerState(ID3D11Device *pd3dDevice)
-{
-	D3D11_RASTERIZER_DESC d3dRasterizerDesc;
-	ZeroMemory(&d3dRasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
-	//래스터라이저 단계에서 컬링(은면 제거)을 하지 않도록 래스터라이저 상태를 생성한다.
-	d3dRasterizerDesc.CullMode = D3D11_CULL_NONE;
-	d3dRasterizerDesc.FillMode = D3D11_FILL_SOLID;
-	pd3dDevice->CreateRasterizerState(&d3dRasterizerDesc, &m_pd3dRasterizerState);
-}
-
 
