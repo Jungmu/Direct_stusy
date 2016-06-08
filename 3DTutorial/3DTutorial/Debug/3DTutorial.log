@@ -1,8 +1,26 @@
-﻿Build started 5/18/2016 8:09:02 PM.
-     1>Project "D:\work\3D\Direct_stusy\3DTutorial\3DTutorial\3DTutorial.vcxproj" on node 2 (Build target(s)).
-     1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Debug\3DTutorial.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt GameFramework.cpp
+﻿빌드 시작: 6/1/2016 1:49:35 PM
+     1>2 노드의 "D:\work\3D\Direct_stusy\3DTutorial\3DTutorial\3DTutorial.vcxproj" 프로젝트(Rebuild 대상)입니다.
+     1>FxCompile:
+         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"PS" /T ps_5_0 /Fo "PS.fxo" /Od /Zi PS.fx 
+         compilation object save succeeded; see D:\work\3D\Direct_stusy\3DTutorial\3DTutorial\PS.fxo
+         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"VS" /T vs_5_0 /Fo "VS.fxo" /Od /Zi VS.fx 
+         compilation object save succeeded; see D:\work\3D\Direct_stusy\3DTutorial\3DTutorial\VS.fxo
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp"Debug\3DTutorial.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
+         stdafx.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Debug\3DTutorial.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt 3DTutorial.cpp Camera.cpp GameFramework.cpp Mesh.cpp Object.cpp Player.cpp Scene.cpp Shader.cpp Timer.cpp
+         Timer.cpp
+         Shader.cpp
+         Scene.cpp
+         Player.cpp
+         Object.cpp
+         Mesh.cpp
          GameFramework.cpp
+         Camera.cpp
+         3DTutorial.cpp
+         코드를 생성하고 있습니다...
+       ResourceCompile:
+         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\rc.exe /D _UNICODE /D UNICODE /l"0x0409" /nologo /fo"Debug\3DTutorial.res" 3DTutorial.rc 
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\work\3D\Direct_stusy\3DTutorial\Debug\3DTutorial.exe" /INCREMENTAL /NOLOGO d3d11.lib d3dx11.lib d3dx11d.lib d3dcompiler.lib d3dx9.lib d3dx9d.lib dxerr.lib dxguid.lib dxgi.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\work\3D\Direct_stusy\3DTutorial\Debug\3DTutorial.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\work\3D\Direct_stusy\3DTutorial\Debug\3DTutorial.lib" /MACHINE:X86 Debug\3DTutorial.res
          Debug\3DTutorial.obj
@@ -16,8 +34,8 @@
          Debug\stdafx.obj
          Debug\Timer.obj
          3DTutorial.vcxproj -> D:\work\3D\Direct_stusy\3DTutorial\Debug\3DTutorial.exe
-     1>Done Building Project "D:\work\3D\Direct_stusy\3DTutorial\3DTutorial\3DTutorial.vcxproj" (Build target(s)).
+     1>"D:\work\3D\Direct_stusy\3DTutorial\3DTutorial\3DTutorial.vcxproj" 프로젝트를 빌드했습니다(Rebuild 대상).
 
-Build succeeded.
+빌드했습니다.
 
-Time Elapsed 00:00:00.40
+경과 시간: 00:00:01.66
